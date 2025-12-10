@@ -105,37 +105,40 @@ Access control is managed by the authorize middleware.
 
 ### Authentication : 
 
-Method | Route | Description | Access 
-POST   | /api/auth/register | Créer un compte (Rôle par défaut : PLAYER) | Public
-POST   | /api/auth/login | Se connecter et récupérer le token JWT | Public
-GET    | /api/auth/me | Récupérer les informations de l'utilisateur connecté | Authentified
+| Method | Route | Description | Access |
+|--------|-------|-------------|--------|
+| POST   | /api/auth/register | Créer un compte (Rôle par défaut : PLAYER) | Public |
+| POST   | /api/auth/login | Se connecter et récupérer le token JWT | Public | 
+| GET    | /api/auth/me | Récupérer les informations de l'utilisateur connecté | Authentified |
 
 ### Tournaments : 
 
-Method | Route | Description | Access
-GET | /api/tournaments | "Liste des tournois (Filtres : ?status |  ?game |  ?format)" | Public
-GET | /api/tournaments/:id | Détails complets d'un tournoi | Public
-POST | /api/tournaments | Créer un tournoi (Statut initial : DRAFT) | Organizer / Admin
-PUT | /api/tournaments/:id | Modifier un tournoi existant | Owner / Admin
-DELETE | /api/tournaments/:id | Supprimer un tournoi (si aucune inscription confirmée) | Owner / Admin
-PATCH | /api/tournaments/:id/status | Changer le statut (ex: DRAFT → OPEN) | Owner / Admin
+| Method | Route | Description | Access |
+|--------|-------|-------------|--------|
+| GET | /api/tournaments | "Liste des tournois (Filtres : ?status |  ?game |  ?format)" | Public |
+| GET | /api/tournaments/:id | Détails complets d'un tournoi | Public |
+| POST | /api/tournaments | Créer un tournoi (Statut initial : DRAFT) | Organizer / Admin | 
+| PUT | /api/tournaments/:id | Modifier un tournoi existant | Owner / Admin | 
+| DELETE | /api/tournaments/:id | Supprimer un tournoi (si aucune inscription confirmée) | Owner / Admin |
+| PATCH | /api/tournaments/:id/status | Changer le statut (ex: DRAFT → OPEN) | Owner / Admin |
 
 ### Teams : 
 
-Method | Route | Description | Access
-GET | /api/teams | Liste de toutes les équipes | Public
-GET | /api/teams/:id | Détails d'une équipe avec ses membres | Public
-POST | /api/teams | Créer une équipe (Le créateur devient Capitaine) | Player
-PUT | /api/teams/:id | Modifier les infos de l'équipe | Capitaine
-DELETE | /api/teams/:id | Supprimer l'équipe (si non inscrite à un tournoi actif) | Capitaine
+| Method | Route | Description | Access |
+|--------|-------|-------------|--------|
+| GET | /api/teams | Liste de toutes les équipes | Public |
+| GET | /api/teams/:id | Détails d'une équipe avec ses membres | Public |
+| POST | /api/teams | Créer une équipe (Le créateur devient Capitaine) | Player |
+| PUT | /api/teams/:id | Modifier les infos de l'équipe | Capitaine |
+| DELETE | /api/teams/:id | Supprimer l'équipe (si non inscrite à un tournoi actif) | Capitaine |
 
 ### Registrations :
 
-Method | Route | Description | Access
-GET | /api/tournaments/:id/registrations | Liste des inscriptions pour un tournoi donné | Authentifié
-POST | /api/tournaments/:id/register | S'inscrire (Solo ou Équipe selon le format) | Player / Capitaine
-PATCH | /api/tournaments/:id/registrations/:regId | "Modifier le statut (ex: WITHDRAWN |  CONFIRMED)" | Owner / Admin
-DELETE | /api/tournaments/:id/registrations/:regId | Annuler une inscription (Uniquement si PENDING) | Owner / Admin
+| Method | Route | Description | Access |
+| GET | /api/tournaments/:id/registrations | Liste des inscriptions pour un tournoi donné | Authentifié |
+| POST | /api/tournaments/:id/register | S'inscrire (Solo ou Équipe selon le format) | Player / Capitaine |
+| PATCH | /api/tournaments/:id/registrations/:regId | "Modifier le statut (ex: WITHDRAWN |  CONFIRMED)" | Owner / Admin |
+| DELETE | /api/tournaments/:id/registrations/:regId | Annuler une inscription (Uniquement si PENDING) | Owner / Admin |
 
 ## Règles Métier & Validations
 
@@ -164,11 +167,12 @@ L'API implémente des règles strictes via Zod et les Services :
         Unicité : Un joueur ou une équipe ne peut pas s'inscrire deux fois au même tournoi.
 
 ## Structure du projet 
-
+```
 src/
 ├── config/
 │   ├── env.js         # Validation env avec Zod
 │   └── prisma.js      # Client Prisma avec adaptateur Better-SQLite3
+│   └── swagger.js     # Configuration swagger
 ├── controllers/
 │   ├── auth.controller.js
 │   ├── tournament.controller.js
@@ -196,4 +200,4 @@ src/
 │   ├── team.service.js
 │   └── registration.service.js
 └── server.js               # Point d'entrée
-
+```
