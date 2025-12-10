@@ -135,6 +135,7 @@ Access control is managed by the authorize middleware.
 ### Registrations :
 
 | Method | Route | Description | Access |
+|--------|-------|-------------|--------|
 | GET | /api/tournaments/:id/registrations | Liste des inscriptions pour un tournoi donné | Authentifié |
 | POST | /api/tournaments/:id/register | S'inscrire (Solo ou Équipe selon le format) | Player / Capitaine |
 | PATCH | /api/tournaments/:id/registrations/:regId | "Modifier le statut (ex: WITHDRAWN |  CONFIRMED)" | Owner / Admin |

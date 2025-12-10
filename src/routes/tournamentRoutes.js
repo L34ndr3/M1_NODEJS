@@ -190,4 +190,40 @@ router.delete('/:id', authenticate, authorize(['ORGANIZER', 'ADMIN']), tournamen
  */
 router.patch('/:id/status', authenticate, authorize(['ORGANIZER', 'ADMIN']), validate(updateStatusSchema), tournamentController.changeStatus);
 
+/**
+ * @swagger
+ * /tournaments/{id}/stats:
+ *   get:
+ *     summary: Statistiques du tournoi (Bonus)
+ *     tags: [Tournaments]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Statistiques récupérées
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 stats:
+ *                   type: object
+ *                   properties:
+ *                     totalRegistrations:
+ *                       type: integer
+ *                     fillRate:
+ *                       type: string
+ *                     breakdown:
+ *                       type: object
+ *                     confirmedParticipants:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ */
+router.get('/:id/stats', tournamentController.getStats);
+
 export default router;

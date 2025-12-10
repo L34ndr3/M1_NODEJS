@@ -30,3 +30,8 @@ export const changeStatus = asyncHandler(async (req, res) => {
     const result = await tournamentService.updateStatus(req.params.id, req.body.status, req.user);
     res.json({ success: true, data: result });
 });
+
+export const getStats = asyncHandler(async (req, res) => {
+  const stats = await tournamentService.getTournamentStats(req.params.id);
+  res.json({ success: true, data: stats });
+});

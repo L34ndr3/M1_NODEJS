@@ -135,3 +135,68 @@ export const updateStatus = async (id, newStatus, user) => {
         data: { status: newStatus },
     });
 };
+
+export const getTournamentStats = async (id) => {
+    const tournament = await prisma.tournament.findUnique({
+        where: { id: Number(id) },
+        include: {
+            registrations: {
+                include: {
+                    player: { select: { id: true, username: true, email: true } },
+                    team: { select: { id: true, name: true, tag: true } },
+                },
+            },
+        },
+    });
+
+    if (!tournament) {
+        const error = new Error('Tournoi introuvable');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    // 1. Calculs de base
+    const totalRegistrations = tournament.registrations.length;
+
+    // 2. Répartition par statut
+    const breakdown = {
+        PENDING: 0,
+        CONFIRMED: 0,
+        REJECTED: 0,
+        WITHDRAWN: 0,
+    };
+
+    tournament.registrations.forEach((reg) => {
+        if (breakdown[reg.status] !== undefined) {
+            breakdown[reg.status]++;
+        }
+    });
+
+    // 3. Pourcentage de remplissage (Basé sur les CONFIRMED)
+    const confirmedCount = breakdown.CONFIRMED;
+    const fillRate = tournament.maxParticipants > 0
+        ? parseFloat(((confirmedCount / tournament.maxParticipants) * 100).toFixed(2))
+        : 0;
+
+    // 4. Liste des participants confirmés (Joueurs ou Équipes)
+    const confirmedParticipants = tournament.registrations
+        .filter((reg) => reg.status === 'CONFIRMED')
+        .map((reg) => {
+            // On renvoie soit l'équipe, soit le joueur selon le format
+            if (tournament.format === 'TEAM') {
+                return { type: 'TEAM', ...reg.team };
+            }
+            return { type: 'PLAYER', ...reg.player };
+        });
+
+    return {
+        tournamentName: tournament.name,
+        maxParticipants: tournament.maxParticipants,
+        stats: {
+            totalRegistrations,
+            breakdown,
+            fillRate: `${fillRate}%`, // Format lisible "50.00%"
+        },
+        confirmedParticipants,
+    };
+};
