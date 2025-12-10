@@ -51,6 +51,7 @@ cp .env.example
 | DATABASE_URL   | SQLite database path                      | file:./dev.db |
 | JWT_SECRET     | Secret for JWT tokens (min 32 chars)      | -             |
 | JWT_EXPIRES_IN | Token expiration time                     | 24h           |
+| SEED_PASSWORD  | Default password for seed                 | ex Azerty123! |
 
 Environment validation is handled by **Zod** in `src/config/env.js`. The server won't start if required variables are missing or invalid.
 

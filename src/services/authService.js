@@ -8,12 +8,12 @@ const generateToken = (user) => {
     return jwt.sign(
         { id: user.id, role: user.role },
         env.JWT_SECRET,
-        { expiresIn: env.JWT_EXPIRES_IN } // [cite: 111]
+        { expiresIn: env.JWT_EXPIRES_IN } 
     );
 };
 
 export const register = async (userData) => {
-    // 1. Vérification unicité [cite: 108, 109]
+    // 1. Vérification unicité 
     const existingUser = await prisma.user.findFirst({
         where: {
             OR: [{ email: userData.email }, { username: userData.username }],
@@ -26,10 +26,10 @@ export const register = async (userData) => {
         throw error;
     }
 
-    // 2. Hashage password [cite: 111]
+    // 2. Hashage password 
     const hashedPassword = await bcrypt.hash(userData.password, 12);
 
-    // 3. Création user (Role par défaut PLAYER) [cite: 110]
+    // 3. Création user (Role par défaut PLAYER) 
     const newUser = await prisma.user.create({
         data: {
             email: userData.email,
@@ -51,7 +51,7 @@ export const login = async (email, password) => {
 
     // Sécurité : Message générique pour ne pas fuiter d'infos
     if (!user || !(await bcrypt.compare(password, user.password))) {
-        const error = new Error('Identifiants incorrects'); // [cite: 106]
+        const error = new Error('Identifiants incorrects'); 
         error.statusCode = 401;
         throw error;
     }

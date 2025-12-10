@@ -7,15 +7,15 @@ export const registerSchema = z.object({
     body: z.object({
         email: z
             .string({ required_error: "L'email est requis" })
-            .email("Format d'email invalide"), // [cite: 108]
+            .email("Format d'email invalide"), 
         username: z
             .string({ required_error: "Le nom d'utilisateur est requis" })
             .min(3, "Le nom d'utilisateur doit faire au moins 3 caractères")
             .max(20, "Le nom d'utilisateur ne doit pas dépasser 20 caractères")
-            .regex(/^[a-zA-Z0-9_]+$/, "Caractères alphanumériques et underscores uniquement"), // [cite: 109]
+            .regex(/^[a-zA-Z0-9_]+$/, "Caractères alphanumériques et underscores uniquement"), 
         password: z
             .string({ required_error: "Le mot de passe est requis" })
-            .regex(passwordRegex, "Le mot de passe doit contenir 8 caractères, 1 majuscule, 1 minuscule et 1 chiffre"), // [cite: 110]
+            .regex(passwordRegex, "Le mot de passe doit contenir 8 caractères, 1 majuscule, 1 minuscule et 1 chiffre"), 
     }),
 });
 

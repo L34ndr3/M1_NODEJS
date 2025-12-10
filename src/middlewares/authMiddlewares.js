@@ -2,7 +2,6 @@ import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
 import prisma from '../config/prisma.js';
 
-// [cite: 113] authenticate
 export const authenticate = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
@@ -29,11 +28,11 @@ export const authenticate = async (req, res, next) => {
     }
 };
 
-// [cite: 114] authorize
+
 export const authorize = (allowedRoles) => {
     return (req, res, next) => {
         if (!allowedRoles.includes(req.user.role)) {
-            return res.status(403).json({ // [cite: 114] Retour 403
+            return res.status(403).json({ 
                 success: false,
                 message: 'Accès interdit',
             });
