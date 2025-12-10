@@ -1,9 +1,10 @@
 import express from 'express'
 import session from 'express-session'
 import chalk from 'chalk'
-// import swaggerUi from 'swagger-ui-express' // Bonus : À décommenter plus tard
-import { fileURLToPath } from 'url'
+import swaggerUi from 'swagger-ui-express'
 import { dirname, join } from 'path'
+import { swaggerSpec } from './config/swagger.js'
+import { fileURLToPath } from 'url'
 
 // Configuration
 import { env } from './config/env.js'
@@ -11,12 +12,10 @@ import prisma from './config/prisma.js'
 
 // Routes
 import apiRoutes from './routes/index.js'
+
 // import viewRoutes from './routes/viewRoutes.js'      // Frontend : À faire plus tard
 // import viewAuthRoutes from './routes/viewAuthRoutes.js'
 // import viewAdminRoutes from './routes/viewAdminRoutes.js'
-
-// Config Swagger (Bonus)
-// import { swaggerSpec } from './config/swagger.js'
 
 // Utils
 // import { icon } from './utils/icons.js' // Frontend : À faire plus tard
@@ -96,11 +95,10 @@ app.use((req, res, next) => {
 // app.use('/admin', viewAdminRoutes)
 // app.use('/', viewRoutes)
 
-// API routes (Cœur du sujet)
+// API routes 
 app.use('/api', apiRoutes)
 
-// Swagger UI - Commenté pour l'instant
-// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 // --- GESTION D'ERREURS ---
 
