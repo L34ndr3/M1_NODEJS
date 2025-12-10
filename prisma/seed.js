@@ -1,11 +1,8 @@
 // prisma/seed.js
-
-// 1. On importe l'instance prisma déjà configurée dans ton application
-// Attention au chemin : on part de "prisma/" donc on remonte d'un cran (..)
 import prisma from '../src/config/prisma.js'
 import bcrypt from 'bcrypt'
 
-// --- DONNÉES DE TEST ---
+// --- DONNÉES STATIQUES ---
 
 const tournamentsData = [
     {
@@ -38,33 +35,47 @@ const tournamentsData = [
 ]
 
 async function main() {
-    console.log('🌱 Début du seeding (via config partagée)...')
+    console.log('🌱 Début du seeding (sécurisé)...')
 
-    const hashedPassword = await bcrypt.hash('Azerty123!', 10)
+    // 1. SÉCURITÉ : Récupération du mot de passe depuis l'environnement
+    const rawPassword = process.env.SEED_PASSWORD
+
+    if (!rawPassword) {
+        console.error('❌ Erreur critique : La variable SEED_PASSWORD est manquante dans le fichier .env')
+        console.error('   Veuillez ajouter SEED_PASSWORD="VotreMotDePasse" dans votre .env avant de lancer le seed.')
+        process.exit(1)
+    }
+
+    // Hashage du mot de passe récupéré
+    const hashedPassword = await bcrypt.hash(rawPassword, 10)
 
     // 2. Nettoyage
-    // L'ordre est important pour respecter les clés étrangères
+    console.log('🧹 Nettoyage de la base de données...')
     await prisma.registration.deleteMany()
     await prisma.tournament.deleteMany()
     await prisma.user.updateMany({ data: { teamId: null } })
     await prisma.team.deleteMany()
     await prisma.user.deleteMany()
 
-    console.log('🧹 Base de données nettoyée')
-
     // 3. Création Admin & Orga
+    console.log('👤 Création des utilisateurs...')
     const organizer = await prisma.user.create({
         data: {
             username: 'OrgaUser',
             email: 'organizer@esport.com',
-            password: hashedPassword,
+            password: hashedPassword, // Utilise le mdp hashé issu du .env
             role: 'ORGANIZER',
         },
     })
 
-    // On crée l'admin juste pour l'avoir
+    // Admin
     await prisma.user.create({
-        data: { username: 'AdminUser', email: 'admin@esport.com', password: hashedPassword, role: 'ADMIN' }
+        data: {
+            username: 'AdminUser',
+            email: 'admin@esport.com',
+            password: hashedPassword,
+            role: 'ADMIN'
+        }
     })
 
     // 4. Création Joueurs
@@ -77,10 +88,11 @@ async function main() {
     })
 
     const soloPlayer = await prisma.user.create({
-        data: { username: 'Daigo', email: 'daigo@sf.com', password: hashedPassword, role: 'PLAYER' }
+        data: { username: 'soloplayer', email: 'solo@player.com', password: hashedPassword, role: 'PLAYER' }
     })
 
     // 5. Création Équipe T1
+    console.log('🛡️ Création des équipes...')
     const teamT1 = await prisma.team.create({
         data: {
             name: 'SK Telecom T1',
@@ -92,9 +104,8 @@ async function main() {
         }
     })
 
-    console.log('✅ Utilisateurs et Équipes créés')
-
     // 6. Création Tournois
+    console.log('🏆 Création des tournois...')
     const createdTournaments = []
     for (const t of tournamentsData) {
         const tournament = await prisma.tournament.create({
@@ -104,6 +115,7 @@ async function main() {
     }
 
     // 7. Inscriptions
+    console.log('📝 Création des inscriptions...')
     const lolTournament = createdTournaments.find(t => t.game === 'League of Legends')
     if (lolTournament) {
         await prisma.registration.create({
@@ -131,7 +143,7 @@ async function main() {
 
 main()
     .catch(e => {
-        console.error('❌ Erreur :', e)
+        console.error('❌ Erreur lors du seeding :', e)
         process.exit(1)
     })
     .finally(async () => {

@@ -1,0 +1,95 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-2xl mx-auto bg-slate-800 p-8 rounded-xl shadow-2xl border border-slate-700 mt-10">
+    <h1 class="text-3xl font-bold mb-6 text-blue-500">Créer un Tournoi</h1>
+    
+    <form id="createTournamentForm" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Nom du tournoi</label>
+                <input type="text" name="name" required class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:border-blue-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Jeu</label>
+                <input type="text" name="game" required class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:border-blue-500 outline-none">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Format</label>
+                <select name="format" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:border-blue-500 outline-none">
+                    <option value="SOLO">SOLO</option>
+                    <option value="TEAM">TEAM</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Participants Max</label>
+                <input type="number" name="maxParticipants" min="2" required class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:border-blue-500 outline-none">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Date de début</label>
+                <input type="date" name="startDate" required class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:border-blue-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Cashprize (€)</label>
+                <input type="number" name="prizePool" min="0" value="0" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:border-blue-500 outline-none">
+            </div>
+        </div>
+
+        <button type="submit" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg shadow-lg transform transition hover:scale-[1.02]">
+            Créer le tournoi
+        </button>
+    </form>
+    
+    <div id="msg" class="mt-4 text-center hidden"></div>
+</div>
+
+<script>
+    // Vérification de sécurité immédiate : Si pas organisateur, on vire !
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || (user.role !== 'ORGANIZER' && user.role !== 'ADMIN')) {
+        alert("Accès réservé aux organisateurs !");
+        window.location.href = '/';
+    }
+
+    document.getElementById('createTournamentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Conversion des types (Important pour la validation Zod)
+        data.maxParticipants = Number(data.maxParticipants);
+        data.prizePool = Number(data.prizePool);
+
+        const token = localStorage.getItem('token');
+
+        const res = await fetch('/api/tournaments', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+        const msgDiv = document.getElementById('msg');
+        msgDiv.classList.remove('hidden');
+
+        if (result.success) {
+            msgDiv.className = "mt-4 p-3 bg-green-900 text-green-200 rounded";
+            msgDiv.innerText = "Tournoi créé avec succès !";
+            setTimeout(() => window.location.href = '/', 1500);
+        } else {
+            msgDiv.className = "mt-4 p-3 bg-red-900 text-red-200 rounded";
+            // Affiche l'erreur principale ou les détails Zod
+            msgDiv.innerText = "Erreur: " + (result.message || "Vérifiez les champs");
+        }
+    });
+</script>
+
+<%- include('../partials/footer') %>

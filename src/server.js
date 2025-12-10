@@ -12,8 +12,7 @@ import prisma from './config/prisma.js'
 
 // Routes
 import apiRoutes from './routes/index.js'
-
-// import viewRoutes from './routes/viewRoutes.js'      // Frontend : À faire plus tard
+import viewRoutes from './routes/viewRoutes.js'     
 // import viewAuthRoutes from './routes/viewAuthRoutes.js'
 // import viewAdminRoutes from './routes/viewAdminRoutes.js'
 
@@ -93,7 +92,8 @@ app.use((req, res, next) => {
 // Routes Vues (HTML) - Commentées pour l'instant
 // app.use('/auth', viewAuthRoutes)
 // app.use('/admin', viewAdminRoutes)
-// app.use('/', viewRoutes)
+
+app.use('/', viewRoutes)
 
 // API routes 
 app.use('/api', apiRoutes)

@@ -1,0 +1,195 @@
+<%- include('../partials/header') %>
+
+    <div class="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
+        <h1 class="text-3xl font-bold text-blue-500 flex items-center gap-2">
+            <span>🏆</span> Espace Tournois
+        </h1>
+        <a href="/tournaments/new" id="createBtn"
+            class="hidden bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded shadow transition flex items-center gap-2">
+            <span>+</span> Créer un tournoi
+        </a>
+    </div>
+
+    <div class="space-y-12 mb-16">
+        <% const sections=[ { key: 'ONGOING' , title: '🔥 En Cours' , color: 'text-orange-500' }, { key: 'OPEN' ,
+            title: '⚔️ Ouverts aux inscriptions' , color: 'text-green-500' }, { key: 'DRAFT' ,
+            title: '📝 Brouillons (À venir)' , color: 'text-gray-400' }, { key: 'COMPLETED' , title: '🏆 Terminés' ,
+            color: 'text-blue-400' }, { key: 'CANCELLED' , title: '❌ Annulés' , color: 'text-red-500' } ]; %>
+
+            <% sections.forEach(section=> { %>
+                <% const list=groupedTournaments[section.key]; %>
+
+                    <% if (list && list.length> 0) { %>
+                        <div class="<%= section.key === 'DRAFT' ? 'opacity-75' : '' %>">
+                            <h2 class="text-2xl font-bold mb-4 <%= section.color %> flex items-center gap-2">
+                                <%= section.title %>
+                                    <span class="text-sm bg-slate-800 px-2 py-1 rounded text-slate-300 ml-2">
+                                        <%= list.length %>
+                                    </span>
+                            </h2>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <% list.forEach(t=> { %>
+                                    <div
+                                        class="bg-slate-800 rounded-lg shadow-lg overflow-hidden border border-slate-700 hover:border-blue-500 transition group relative">
+
+                                        <div
+                                            class="absolute top-0 right-0 bg-slate-900/80 px-2 py-1 text-xs text-slate-300 rounded-bl">
+                                            <%= t.format %>
+                                        </div>
+
+                                        <div class="p-6">
+                                            <h3
+                                                class="text-xl font-bold mb-2 text-white group-hover:text-blue-400 transition truncate">
+                                                <%= t.name %>
+                                            </h3>
+
+                                            <div class="text-sm text-slate-400 space-y-1 mb-4">
+                                                <p>🎮 <span class="text-slate-200">
+                                                        <%= t.game %>
+                                                    </span></p>
+                                                <p>📅 <%= new Date(t.startDate).toLocaleDateString() %>
+                                                </p>
+                                                <p>💰 Prize: <%= t.prizePool %> €</p>
+                                            </div>
+
+                                            <a href="/tournaments/<%= t.id %>"
+                                                class="block text-center bg-slate-700 hover:bg-slate-600 text-white py-2 rounded transition">
+                                                Gérer / Voir
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <% }) %>
+                            </div>
+                        </div>
+                        <% } %>
+                            <% }) %>
+
+                                <% let isEmpty=true; Object.values(groupedTournaments).forEach(arr=> { if(arr.length >
+                                    0) isEmpty = false; });
+                                    %>
+
+                                    <% if (isEmpty) { %>
+                                        <div class="bg-slate-800 p-8 rounded-lg text-center text-slate-400">
+                                            Aucun tournoi n'a été créé pour le moment.
+                                        </div>
+                                        <% } %>
+    </div>
+
+
+    <div class="pt-8 border-t border-slate-700">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-purple-500 flex items-center gap-2">
+                <span>🛡️</span> Équipes Inscrites
+            </h2>
+            <a href="/teams/new" id="createTeamBtn"
+                class="hidden bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded shadow transition flex items-center gap-2">
+                <span>+</span> Fonder mon équipe
+            </a>
+        </div>
+
+        <% if (teams.length===0) { %>
+            <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 text-slate-400">
+                Aucune équipe enregistrée.
+            </div>
+            <% } else { %>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <% teams.forEach(team=> { %>
+                        <div class="team-card bg-slate-800 p-4 rounded-lg border border-slate-700 flex flex-col justify-between hover:bg-slate-750 transition group relative"
+                            data-captain-id="<%= team.captainId %>">
+
+                            <div class="captain-actions hidden absolute top-2 right-2 flex gap-2">
+                                <a href="/teams/<%= team.id %>/edit"
+                                    class="bg-slate-900 p-1.5 rounded text-yellow-500 hover:text-yellow-400"
+                                    title="Modifier">✏️</a>
+                                <button onclick="deleteTeam(<%= team.id %>)"
+                                    class="bg-slate-900 p-1.5 rounded text-red-500 hover:text-red-400"
+                                    title="Supprimer">🗑️</button>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="text-lg font-bold text-white">
+                                        <%= team.name %>
+                                    </h3>
+                                    <span class="text-xs font-mono bg-purple-900 text-purple-200 px-2 py-1 rounded">[<%=
+                                            team.tag %>]</span>
+                                </div>
+                                <span class="text-xs font-mono bg-yellow-900 text-purple-200 px-2 py-1 rounded"> TEAM ID : [<%=
+                                            team.id %>] </span>
+                                <p class="text-sm text-slate-400"><br> Capitaine: <span class="text-slate-300">
+                                        <%= team.captain.username %>
+                                    </span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-slate-700 flex justify-between items-center text-sm">
+                                <span class="text-slate-500">Membres</span>
+                                <span class="bg-slate-700 px-2 py-1 rounded text-white font-bold">
+                                    <%= team._count.members %>
+                                </span>
+                            </div>
+                        </div>
+                        <% }) %>
+                </div>
+                <% } %>
+    </div>
+
+
+    <script>
+        // 1. Logique d'initialisation (isolée pour éviter le conflit "const token")
+        document.addEventListener("DOMContentLoaded", () => {
+            const userStr = localStorage.getItem('user');
+
+            if (userStr) {
+                const user = JSON.parse(userStr);
+
+                // A. Bouton Créer Tournoi (Orga/Admin)
+                if (user.role === 'ORGANIZER' || user.role === 'ADMIN') {
+                    const btn = document.getElementById('createBtn');
+                    if (btn) btn.classList.remove('hidden');
+                }
+
+                // B. Bouton Créer Équipe (Joueur)
+                if (user.role === 'PLAYER') {
+                    const btn = document.getElementById('createTeamBtn');
+                    if (btn) btn.classList.remove('hidden');
+                }
+
+                // C. Boutons Modifier/Supprimer Équipe (Seulement pour le capitaine)
+                const teamCards = document.querySelectorAll('.team-card');
+                teamCards.forEach(card => {
+                    // On lit l'attribut data-captain-id mis dans le HTML
+                    const captainId = parseInt(card.dataset.captainId);
+                    if (captainId === user.id) {
+                        const actions = card.querySelector('.captain-actions');
+                        if (actions) actions.classList.remove('hidden');
+                    }
+                });
+            }
+        });
+
+        // 2. Fonction globale (doit rester en dehors pour être appelée par onclick="")
+        async function deleteTeam(id) {
+            // On récupère le token au moment du clic
+            const token = localStorage.getItem('token');
+
+            if (!confirm("Voulez-vous vraiment dissoudre cette équipe ?")) return;
+
+            try {
+                const res = await fetch(`/api/teams/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert("Équipe supprimée.");
+                    location.reload();
+                } else {
+                    alert("Erreur : " + (data.message || "Impossible de supprimer"));
+                }
+            } catch (err) {
+                alert("Erreur réseau");
+            }
+        }
+    </script>
+    <%- include('../partials/footer') %>

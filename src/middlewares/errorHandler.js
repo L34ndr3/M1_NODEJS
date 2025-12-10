@@ -1,23 +1,20 @@
-/**
- * Centralized error handler middleware
- * Must be registered last (after all routes)
- */
-export const errorHandler = (err, req, res, _next) => {
-  console.error('Error:', err.message)
+export const errorHandler = (err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
 
-  const statusCode = err.statusCode || 500
+  console.error('💥 Erreur :', err.message);
 
-  // API requests get JSON response
-  if (req.url.startsWith('/api/')) {
+  // Si c'est une requête API (commence par /api), on renvoie du JSON
+  if (req.originalUrl.startsWith('/api')) {
     return res.status(statusCode).json({
       success: false,
-      error: err.message || 'Erreur serveur',
-    })
+      message: err.message || 'Erreur interne du serveur',
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
   }
 
-  // View requests get HTML error page
+  // Sinon (c'est une page web), on affiche la page d'erreur EJS
   res.status(statusCode).render('pages/error', {
     title: 'Erreur',
-    message: err.message || 'Une erreur est survenue.',
-  })
-}
+    error: err
+  });
+};

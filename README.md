@@ -44,13 +44,13 @@ Create a `.env` file based on `.env.example`:
 cp .env.example
 ```
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| PORT | Server port | 3000 |
-| NODE_ENV | Environment (development/production/test) | development |
-| DATABASE_URL | SQLite database path | file:./dev.db |
-| JWT_SECRET | Secret for JWT tokens (min 32 chars) | - |
-| JWT_EXPIRES_IN | Token expiration time | 24h |
+| Variable       | Description                               | Default       |
+| -------------- | ----------------------------------------- | ------------- |
+| PORT           | Server port                               | 3000          |
+| NODE_ENV       | Environment (development/production/test) | development   |
+| DATABASE_URL   | SQLite database path                      | file:./dev.db |
+| JWT_SECRET     | Secret for JWT tokens (min 32 chars)      | -             |
+| JWT_EXPIRES_IN | Token expiration time                     | 24h           |
 
 Environment validation is handled by **Zod** in `src/config/env.js`. The server won't start if required variables are missing or invalid.
 
@@ -105,41 +105,41 @@ Access control is managed by the authorize middleware.
 
 ### Authentication : 
 
-| Method | Route | Description | Access |
-|--------|-------|-------------|--------|
-| POST   | /api/auth/register | Créer un compte (Rôle par défaut : PLAYER) | Public |
-| POST   | /api/auth/login | Se connecter et récupérer le token JWT | Public | 
-| GET    | /api/auth/me | Récupérer les informations de l'utilisateur connecté | Authentified |
+| Method | Route              | Description                                          | Access       |
+| ------ | ------------------ | ---------------------------------------------------- | ------------ |
+| POST   | /api/auth/register | Créer un compte (Rôle par défaut : PLAYER)           | Public       |
+| POST   | /api/auth/login    | Se connecter et récupérer le token JWT               | Public       |
+| GET    | /api/auth/me       | Récupérer les informations de l'utilisateur connecté | Authentified |
 
 ### Tournaments : 
 
-| Method | Route | Description | Access |
-|--------|-------|-------------|--------|
-| GET | /api/tournaments | "Liste des tournois (Filtres : ?status |  ?game |  ?format)" | Public |
-| GET | /api/tournaments/:id | Détails complets d'un tournoi | Public |
-| POST | /api/tournaments | Créer un tournoi (Statut initial : DRAFT) | Organizer / Admin | 
-| PUT | /api/tournaments/:id | Modifier un tournoi existant | Owner / Admin | 
-| DELETE | /api/tournaments/:id | Supprimer un tournoi (si aucune inscription confirmée) | Owner / Admin |
-| PATCH | /api/tournaments/:id/status | Changer le statut (ex: DRAFT → OPEN) | Owner / Admin |
+| Method | Route                       | Description                                            | Access            |
+| ------ | --------------------------- | ------------------------------------------------------ | ----------------- |
+| GET    | /api/tournaments            | "Liste des tournois (Filtres : ?status                 | ?game             | ?format)" | Public |
+| GET    | /api/tournaments/:id        | Détails complets d'un tournoi                          | Public            |
+| POST   | /api/tournaments            | Créer un tournoi (Statut initial : DRAFT)              | Organizer / Admin |
+| PUT    | /api/tournaments/:id        | Modifier un tournoi existant                           | Owner / Admin     |
+| DELETE | /api/tournaments/:id        | Supprimer un tournoi (si aucune inscription confirmée) | Owner / Admin     |
+| PATCH  | /api/tournaments/:id/status | Changer le statut (ex: DRAFT → OPEN)                   | Owner / Admin     |
 
 ### Teams : 
 
-| Method | Route | Description | Access |
-|--------|-------|-------------|--------|
-| GET | /api/teams | Liste de toutes les équipes | Public |
-| GET | /api/teams/:id | Détails d'une équipe avec ses membres | Public |
-| POST | /api/teams | Créer une équipe (Le créateur devient Capitaine) | Player |
-| PUT | /api/teams/:id | Modifier les infos de l'équipe | Capitaine |
+| Method | Route          | Description                                             | Access    |
+| ------ | -------------- | ------------------------------------------------------- | --------- |
+| GET    | /api/teams     | Liste de toutes les équipes                             | Public    |
+| GET    | /api/teams/:id | Détails d'une équipe avec ses membres                   | Public    |
+| POST   | /api/teams     | Créer une équipe (Le créateur devient Capitaine)        | Player    |
+| PUT    | /api/teams/:id | Modifier les infos de l'équipe                          | Capitaine |
 | DELETE | /api/teams/:id | Supprimer l'équipe (si non inscrite à un tournoi actif) | Capitaine |
 
 ### Registrations :
 
-| Method | Route | Description | Access |
-|--------|-------|-------------|--------|
-| GET | /api/tournaments/:id/registrations | Liste des inscriptions pour un tournoi donné | Authentifié |
-| POST | /api/tournaments/:id/register | S'inscrire (Solo ou Équipe selon le format) | Player / Capitaine |
-| PATCH | /api/tournaments/:id/registrations/:regId | "Modifier le statut (ex: WITHDRAWN |  CONFIRMED)" | Owner / Admin |
-| DELETE | /api/tournaments/:id/registrations/:regId | Annuler une inscription (Uniquement si PENDING) | Owner / Admin |
+| Method | Route                                     | Description                                     | Access             |
+| ------ | ----------------------------------------- | ----------------------------------------------- | ------------------ |
+| GET    | /api/tournaments/:id/registrations        | Liste des inscriptions pour un tournoi donné    | Authentifié        |
+| POST   | /api/tournaments/:id/register             | S'inscrire (Solo ou Équipe selon le format)     | Player / Capitaine |
+| PATCH  | /api/tournaments/:id/registrations/:regId | "Modifier le statut (ex: WITHDRAWN              | CONFIRMED)"        | Owner / Admin |
+| DELETE | /api/tournaments/:id/registrations/:regId | Annuler une inscription (Uniquement si PENDING) | Owner / Admin      |
 
 ## Règles Métier & Validations
 
@@ -172,7 +172,7 @@ L'API implémente des règles strictes via Zod et les Services :
 src/
 ├── config/
 │   ├── env.js         # Validation env avec Zod
-│   └── prisma.js      # Client Prisma avec adaptateur Better-SQLite3
+│   ├── prisma.js      # Client Prisma avec adaptateur Better-SQLite3
 │   └── swagger.js     # Configuration swagger
 ├── controllers/
 │   ├── auth.controller.js
@@ -183,13 +183,15 @@ src/
 │   ├── auth.middleware.js  # Vérification JWT & RBAC
 │   ├── validate.js         # Validation des schémas Zod
 │   ├── errorHandler.js     # Gestion globale des erreurs
-│   └── logger.js           # Logs des requêtes (Chalk)
+│   ├── logger.js           # Logs des requêtes (Chalk)
+│   └── notFound.js         # Routes non trouvées
 ├── routes/
 │   ├── index.js            # Routeur principal
 │   ├── auth.routes.js
 │   ├── tournamentRoutes.js
 │   ├── teamRoutes.js
-│   └── registrationRoutes.js
+│   ├── registrationRoutes.js
+│   └── viewRoutes.js       # Routes pour les vues 
 ├── schemas/                # Schémas Zod
 │   ├── auth.schema.js
 │   ├── tournamentSchema.js
@@ -200,5 +202,21 @@ src/
 │   ├── tournament.service.js
 │   ├── team.service.js
 │   └── registration.service.js
+├── utils/               # async route handler
+│   ├── asyncHandler.js
+├── views/               # EJS Templates
+│   ├── pages/
+│   │   ├── createTeam.ejs
+│   │   ├── editTeam.ejs
+│   │   ├── createTournament.ejs
+│   │   ├── error.ejs
+│   │   ├── home.ejs
+│   │   ├── login.ejs
+│   │   ├── profile.ejs
+│   │   ├── register.ejs
+│   │   ├── tournament.ejs
+│   ├── partials/
+│   │   ├── footer.ejs
+│   │   ├── header.ejs
 └── server.js               # Point d'entrée
 ```

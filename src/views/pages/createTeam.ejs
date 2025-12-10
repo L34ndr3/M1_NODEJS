@@ -1,0 +1,62 @@
+<%- include('../partials/header') %>
+
+    <div class="max-w-md mx-auto bg-slate-800 p-8 rounded-xl shadow-2xl border border-slate-700 mt-10">
+        <h1 class="text-3xl font-bold mb-6 text-purple-500">Créer une Équipe</h1>
+
+        <form id="createTeamForm" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Nom de l'équipe</label>
+                <input type="text" name="name" required placeholder="Ex: SK Telecom T1"
+                    class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:border-purple-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Tag (3-5 Lettres MAJ + Chiffres)</label>
+                <input type="text" name="tag" required placeholder="Ex: T1" maxlength="5"
+                    class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:border-purple-500 outline-none uppercase">
+                <p class="text-xs text-slate-500 mt-1">Exemple: G2, KC, T1, FNC</p>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-lg shadow-lg transform transition hover:scale-[1.02]">
+                Fonder l'équipe
+            </button>
+        </form>
+
+        <div id="msg" class="mt-4 text-center hidden"></div>
+    </div>
+
+    <script>
+        // Vérif Token
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = '/login';
+
+        document.getElementById('createTeamForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            const res = await fetch('/api/teams', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+            const msgDiv = document.getElementById('msg');
+            msgDiv.classList.remove('hidden');
+
+            if (result.success) {
+                msgDiv.className = "mt-4 p-3 bg-green-900 text-green-200 rounded";
+                msgDiv.innerText = "Équipe créée !";
+                setTimeout(() => window.location.href = '/', 1500);
+            } else {
+                msgDiv.className = "mt-4 p-3 bg-red-900 text-red-200 rounded";
+                msgDiv.innerText = "Erreur: " + (result.message || "Tag invalide");
+            }
+        });
+    </script>
+
+    <%- include('../partials/footer') %>

@@ -1,0 +1,276 @@
+<%- include('../partials/header') %>
+
+<div class="bg-slate-800 rounded-xl p-8 border border-slate-700 relative space-y-8">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h1 class="text-4xl font-bold text-blue-500 mb-2"><%= tournament.name %></h1>
+            
+            <div class="flex flex-wrap items-center gap-3">
+                <span id="statusBadge" class="px-3 py-1 bg-slate-700 text-slate-200 rounded-full text-sm font-bold border border-slate-600">
+                    <%= tournament.status %>
+                </span>
+
+                <div id="statusControl" class="hidden flex items-center gap-2">
+                    <select id="statusSelect" onchange="changeStatus(<%= tournament.id %>, this.value)" class="bg-slate-900 border border-blue-500 text-white text-sm rounded-lg block p-2 font-bold cursor-pointer hover:bg-slate-800 transition">
+                        <option value="DRAFT" <%= tournament.status === 'DRAFT' ? 'selected' : '' %>>📝 DRAFT</option>
+                        <option value="OPEN" <%= tournament.status === 'OPEN' ? 'selected' : '' %>>⚔️ OPEN</option>
+                        <option value="ONGOING" <%= tournament.status === 'ONGOING' ? 'selected' : '' %>>🔥 ONGOING</option>
+                        <option value="COMPLETED" <%= tournament.status === 'COMPLETED' ? 'selected' : '' %>>🏆 COMPLETED</option>
+                        <option value="CANCELLED" <%= tournament.status === 'CANCELLED' ? 'selected' : '' %>>❌ CANCELLED</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex gap-2">
+            <button onclick="loadStats(<%= tournament.id %>)" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded font-bold shadow transition flex items-center gap-2">
+                📊 Stats
+            </button>
+            
+            <button id="deleteBtn" class="hidden bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded font-bold transition shadow" onclick="deleteTournament(<%= tournament.id %>)">
+                🗑️ Supprimer
+            </button>
+        </div>
+    </div>
+
+    <div id="statsContainer" class="hidden bg-slate-900 p-6 rounded-lg border border-indigo-500/30">
+        <h3 class="text-xl font-bold text-indigo-400 mb-4 flex items-center gap-2">
+            <span>📈</span> Analyse du Tournoi
+        </h3>
+        <div id="statsContent" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <p class="text-slate-400 animate-pulse">Chargement des données...</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-slate-900 p-4 rounded border border-slate-700/50">
+            <p class="text-slate-400 text-xs uppercase font-bold mb-1">Jeu</p>
+            <p class="text-xl font-semibold text-white"><%= tournament.game %></p>
+        </div>
+        <div class="bg-slate-900 p-4 rounded border border-slate-700/50">
+            <p class="text-slate-400 text-xs uppercase font-bold mb-1">Format</p>
+            <p class="text-xl font-semibold text-white"><%= tournament.format %></p>
+        </div>
+        <div class="bg-slate-900 p-4 rounded border border-slate-700/50">
+            <p class="text-slate-400 text-xs uppercase font-bold mb-1">Participants</p>
+            <p class="text-xl font-semibold text-white"><%= tournament.registrations.length %> / <%= tournament.maxParticipants %></p>
+        </div>
+    </div>
+
+    <div>
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+            <span>📋</span> Liste des Inscrits
+        </h2>
+        <div class="overflow-x-auto bg-slate-900 rounded-lg border border-slate-700">
+            <table class="w-full text-left text-sm text-slate-400">
+                <thead class="bg-slate-950 text-slate-200 uppercase text-xs">
+                    <tr>
+                        <th class="px-6 py-3">Nom / Équipe</th>
+                        <th class="px-6 py-3">Date</th>
+                        <th class="px-6 py-3">Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% tournament.registrations.forEach(reg => { %>
+                        <tr class="border-b border-slate-800 hover:bg-slate-800/50 transition">
+                            <td class="px-6 py-4 font-medium text-white">
+                                <%= reg.team ? `[TEAM] ${reg.team.name}` : `[JOUEUR] ${reg.player.username}` %>
+                            </td>
+                            <td class="px-6 py-4">
+                                <%= new Date(reg.registeredAt).toLocaleDateString() %>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-xs font-bold px-2 py-1 rounded border border-slate-700 
+                                    <%= reg.status === 'CONFIRMED' ? 'text-green-400 bg-green-900/20' : 
+                                       (reg.status === 'REJECTED' || reg.status === 'WITHDRAWN' ? 'text-red-400 bg-red-900/20' : 'text-yellow-400 bg-yellow-900/20') %>">
+                                    <%= reg.status %>
+                                </span>
+                            </td>
+                        </tr>
+                    <% }) %>
+                    <% if (tournament.registrations.length === 0) { %>
+                        <tr><td colspan="3" class="px-6 py-8 text-center text-slate-500 italic">Aucun inscrit pour le moment.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="text-center space-y-4">
+        <button id="joinBtn" onclick="joinTournament(<%= tournament.id %>)" class="hidden bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105">
+            S'inscrire au tournoi
+        </button>
+
+        <button id="leaveBtn" class="hidden bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105">
+            Se désinscrire
+        </button>
+        <p id="msg" class="text-sm font-medium h-6"></p>
+    </div>
+</div>
+
+<script>
+    // --- DONNÉES ---
+    const registrations = <%- JSON.stringify(tournament.registrations) %>;
+    const tournamentFormat = "<%= tournament.format %>";
+    const userStr = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+    
+    // --- INITIALISATION ---
+    if (userStr) {
+        const user = JSON.parse(userStr);
+
+        // Mode Orga/Admin
+        if (user.role === 'ADMIN' || user.role === 'ORGANIZER') {
+            document.getElementById('deleteBtn').classList.remove('hidden');
+            document.getElementById('statusControl').classList.remove('hidden');
+            document.getElementById('statusBadge').classList.add('hidden');
+        }
+
+        // Mode Joueur
+        let myReg = null;
+        if (tournamentFormat === 'SOLO') {
+            myReg = registrations.find(r => r.playerId === user.id);
+        } else {
+            myReg = registrations.find(r => r.team && r.team.captainId === user.id); 
+        }
+
+        if (myReg && myReg.status !== 'WITHDRAWN') {
+            const btn = document.getElementById('leaveBtn');
+            btn.classList.remove('hidden');
+            btn.onclick = () => leaveTournament(<%= tournament.id %>, myReg);
+        } else {
+            document.getElementById('joinBtn').classList.remove('hidden');
+        }
+    } else {
+        document.getElementById('joinBtn').classList.remove('hidden');
+    }
+
+    // --- FONCTIONS ---
+
+    // 1. CHARGER LES STATS (Bonus 3)
+    async function loadStats(id) {
+        const container = document.getElementById('statsContainer');
+        const content = document.getElementById('statsContent');
+        
+        // Toggle affichage
+        if (!container.classList.contains('hidden')) {
+            container.classList.add('hidden');
+            return;
+        }
+        container.classList.remove('hidden');
+
+        try {
+            const res = await fetch(`/api/tournaments/${id}/stats`);
+            const json = await res.json();
+            
+            if (json.success) {
+                const stats = json.data.stats;
+                const breakdown = stats.breakdown;
+
+                content.innerHTML = `
+                    <div class="bg-slate-800 p-4 rounded text-center">
+                        <p class="text-slate-400 text-xs uppercase">Total Inscrits</p>
+                        <p class="text-2xl font-bold text-white">${stats.totalRegistrations}</p>
+                    </div>
+                    <div class="bg-slate-800 p-4 rounded text-center">
+                        <p class="text-slate-400 text-xs uppercase">Remplissage</p>
+                        <p class="text-2xl font-bold text-blue-400">${stats.fillRate}</p>
+                        <div class="w-full bg-slate-700 h-2 mt-2 rounded-full overflow-hidden">
+                            <div class="bg-blue-500 h-full" style="width: ${stats.fillRate}"></div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-800 p-4 rounded text-center">
+                        <p class="text-slate-400 text-xs uppercase">Confirmés</p>
+                        <p class="text-2xl font-bold text-green-400">${breakdown.CONFIRMED}</p>
+                    </div>
+                    <div class="bg-slate-800 p-4 rounded text-center">
+                        <p class="text-slate-400 text-xs uppercase">En attente</p>
+                        <p class="text-2xl font-bold text-yellow-400">${breakdown.PENDING}</p>
+                    </div>
+                `;
+            }
+        } catch (err) {
+            content.innerHTML = `<p class="text-red-400">Erreur lors du chargement des statistiques.</p>`;
+        }
+    }
+
+    // 2. CHANGER STATUT
+    async function changeStatus(id, newStatus) {
+        if(!confirm(`Passer le tournoi en "${newStatus}" ?`)) return location.reload();
+        
+        const res = await fetch(`/api/tournaments/${id}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ status: newStatus })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            location.reload();
+        } else {
+            alert("Erreur: " + (data.message || data.error));
+            location.reload();
+        }
+    }
+
+    // 3. ACTIONS JOUEUR
+    async function joinTournament(id) {
+        if (!token) return alert("Connectez-vous !");
+        
+        let body = {};
+        if (tournamentFormat === 'TEAM') {
+            const teamId = prompt("ID de votre équipe :");
+            if (!teamId) return;
+            body.teamId = Number(teamId);
+        }
+
+        const res = await fetch(`/api/tournaments/${id}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(body)
+        });
+        handleResponse(res, "Inscription réussie !");
+    }
+
+    async function leaveTournament(tid, reg) {
+        if (!confirm("Se désinscrire ?")) return;
+        
+        let url = `/api/tournaments/${tid}/registrations/${reg.id}`;
+        let method = reg.status === 'CONFIRMED' ? 'PATCH' : 'DELETE';
+        let body = reg.status === 'CONFIRMED' ? JSON.stringify({ status: 'WITHDRAWN' }) : null;
+
+        const res = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: body
+        });
+        handleResponse(res, "Désinscription effectuée.");
+    }
+
+    async function deleteTournament(id) {
+        if (!confirm("Supprimer ce tournoi ?")) return;
+        const res = await fetch(`/api/tournaments/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if(data.success) window.location.href = '/';
+        else alert("Erreur: " + data.message);
+    }
+
+    async function handleResponse(res, msgText) {
+        const data = await res.json();
+        const msg = document.getElementById('msg');
+        if (data.success) {
+            msg.className = "text-green-400 font-bold";
+            msg.innerText = msgText;
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            msg.className = "text-red-400 font-bold";
+            msg.innerText = "Erreur : " + (data.message || data.error);
+        }
+    }
+</script>
+
+<%- include('../partials/footer') %>
